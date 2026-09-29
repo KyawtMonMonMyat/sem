@@ -1,7 +1,7 @@
-FROM eclipse-temurin:17-jre
+FROM amazoncorretto:17
 
-COPY ./target/classes /tmp
+COPY ./target/semApp.jar /tmp
 
 WORKDIR /tmp
 
-ENTRYPOINT ["java", "com.napier.sem.App"]
+ENTRYPOINT ["java", "-jar", "semApp.jar"]
