@@ -1,6 +1,7 @@
 package com.napier.sem;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class App
 {
@@ -104,8 +105,6 @@ public class App
             // Execute SQL statement
             ResultSet rset = stmt.executeQuery(strSelect);
 
-            // Return new employee if valid.
-            // Check one is returned
             if (rset.next())
             {
                 Employee emp = new Employee();
@@ -119,13 +118,75 @@ public class App
                 return emp;
             }
             else
+            {
                 return null;
+            }
         }
         catch (Exception e)
         {
             System.out.println(e.getMessage());
             System.out.println("Failed to get employee details");
             return null;
+        }
+    }
+
+    public ArrayList<Employee> getSalariesByRole(String role)
+    {
+        ArrayList<Employee> employees = new ArrayList<Employee>();
+
+        try
+        {
+            // Create an SQL statement
+            Statement stmt = con.createStatement();
+
+            // Create string for SQL statement
+            String strSelect =
+                    "SELECT employees.emp_no, employees.first_name, employees.last_name, salaries.salary "
+                            + "FROM employees, salaries, titles "
+                            + "WHERE employees.emp_no = salaries.emp_no "
+                            + "AND employees.emp_no = titles.emp_no "
+                            + "AND salaries.to_date = '9999-01-01' "
+                            + "AND titles.to_date = '9999-01-01' "
+                            + "AND titles.title = '" + role + "' "
+                            + "ORDER BY employees.emp_no ASC";
+
+            // Execute SQL statement
+            ResultSet rset = stmt.executeQuery(strSelect);
+
+            // Extract employee information
+            while (rset.next())
+            {
+                Employee emp = new Employee();
+                emp.emp_no = rset.getInt("emp_no");
+                emp.first_name = rset.getString("first_name");
+                emp.last_name = rset.getString("last_name");
+                emp.salary = rset.getInt("salary");
+
+                employees.add(emp);
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get salaries by role");
+        }
+
+        return employees;
+    }
+
+    public void displaySalaries(ArrayList<Employee> employees)
+    {
+        if (employees != null)
+        {
+            for (Employee emp : employees)
+            {
+                System.out.println(
+                        emp.emp_no + "\t"
+                                + emp.first_name + "\t"
+                                + emp.last_name + "\t"
+                                + emp.salary
+                );
+            }
         }
     }
 
@@ -157,6 +218,12 @@ public class App
 
         // Display results
         a.displayEmployee(emp);
+
+        // Get salaries by role
+        ArrayList<Employee> employees = a.getSalariesByRole("Engineer");
+
+        // Display salary report
+        a.displaySalaries(employees);
 
         // Disconnect from database
         a.disconnect();
